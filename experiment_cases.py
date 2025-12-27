@@ -1,57 +1,102 @@
 # experiment_cases.py
 import numpy as np
-from scipy.interpolate import interp1d
 
-def generate_base_series(length=50, seed=42):
-    """
-    產生基準序列 (單維)
-    :param length: 序列長度
-    :param seed: 隨機種子
-    :return: numpy array
-    """
-    np.random.seed(seed)
-    t = np.linspace(0, 4*np.pi, length)
-    base = np.sin(t) + 0.1 * np.random.randn(length)
-    return base
+# ======================================================
+# Synthetic Time Series - Common Experimental Cases
+# ======================================================
 
-def time_shift_series(series, shift=5):
+def generate_base_series(N=200):
     """
-    產生時間偏移序列
-    :param series: 原序列 numpy array
-    :param shift: 向右偏移幾個時間點 (正值往右)
-    :return: numpy array
-    """
-    n = len(series)
-    shifted = np.zeros_like(series)
-    if shift >= 0:
-        shifted[shift:] = series[:n-shift]
-        shifted[:shift] = series[0]  # 用第一個值填補
-    else:
-        shift = abs(shift)
-        shifted[:n-shift] = series[shift:]
-        shifted[n-shift:] = series[-1]  # 用最後一個值填補
-    return shifted
+    Generate base synthetic time series
+    x(t) = sin(t), t in [0, 2π]
 
-def time_stretch_series(series, factor=1.5):
-    """
-    產生時間拉伸/壓縮序列
-    :param series: 原序列 numpy array
-    :param factor: 拉伸因子 >1 拉長, <1 壓縮
-    :return: numpy array
-    """
-    n = len(series)
-    t_original = np.linspace(0, 1, n)
-    t_new = np.linspace(0, 1, int(n*factor))
-    f = interp1d(t_original, series, kind='linear')
-    stretched = f(t_new)
-    return stretched
+    Parameters
+    ----------
+    N : int
+        Length of time series
 
+    Returns
+    -------
+    np.ndarray
+        Base time series of shape (N,)
+    """
+    t = np.linspace(0, 2 * np.pi, N)
+    x = np.sin(t)
+    return x
+
+
+def scale_change(series, alpha=3.0):
+    """
+    Case 1: Scale change
+    y = alpha * x
+
+    Parameters
+    ----------
+    series : np.ndarray
+        Base time series
+    alpha : float
+        Scaling factor
+
+    Returns
+    -------
+    np.ndarray
+        Scaled time series
+    """
+    return alpha * series
+
+
+def offset_change(series, beta=5.0):
+    """
+    Case 2: Offset change
+    y = x + beta
+
+    Parameters
+    ----------
+    series : np.ndarray
+        Base time series
+    beta : float
+        Offset value
+
+    Returns
+    -------
+    np.ndarray
+        Offset time series
+    """
+    return series + beta
+
+
+def time_shift(series, tau=20):
+    """
+    Case 3: Time shift (circular shift)
+    y = roll(x, tau)
+
+    Parameters
+    ----------
+    series : np.ndarray
+        Base time series
+    tau : int
+        Shift amount (number of samples)
+
+    Returns
+    -------
+    np.ndarray
+        Time-shifted time series
+    """
+    return np.roll(series, tau)
+
+
+# ======================================================
+# Example usage
+# ======================================================
 if __name__ == "__main__":
-    # 範例
-    base = generate_base_series(length=20)
-    shifted = time_shift_series(base, shift=3)
-    stretched = time_stretch_series(base, factor=1.5)
+    base = generate_base_series()
 
-    print("Base Series:", base)
-    print("Time Shifted Series:", shifted)
-    print("Time Stretched Series:", stretched)
+    case_scale = scale_change(base)
+    case_offset = offset_change(base)
+    case_shift = time_shift(base)
+
+    print("Base series length:", len(base))
+    print("Scale case example:", case_scale[:5])
+    print("Offset case example:", case_offset[:5])
+    print("Time shift case example:", case_shift[:5])
+
