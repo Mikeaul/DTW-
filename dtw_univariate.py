@@ -29,7 +29,7 @@ def dtw_distance(ts1, ts2):
 
     dtw_dist = dtw[n, m]
 
-    # 回溯找到最佳對齊路徑
+    #最佳路徑回溯
     i, j = n, m
     path = []
     while i > 0 and j > 0:
